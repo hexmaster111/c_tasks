@@ -132,7 +132,7 @@ int llist_idxof(LLISTPTR t, void *item)
 
 void llist_itterate(LLISTPTR t, LLIST_ITTERATOR_FUNC ittrf, void *user)
 {
-    // todo: have a way to check if the list was modifyed while itterating
+    // todo: have a way to check if the list was modifyed while itterating 
     for (size_t i = 0; i < t->len; i++)
     {
         ittrf(llist_at(t, i), user);

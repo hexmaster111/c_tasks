@@ -8,6 +8,8 @@ struct TaskInfo;
 // this defines a func pointer that returns nothing, and takes in a TaskRunner, Taskinfo, and void *data
 typedef void (*TaskDeligate)(struct TaskRunner *run, struct TaskInfo *self, void *data);
 
+#define TASK(TNAME) void TNAME (struct TaskRunner *run, struct TaskInfo *self, void *data)
+
 /*
     tasks / memory is allocated with the AddTask method, they are added into the task info list,
     the tasks then do there work intel the task Calls ResaultError() or ResaultSucess()

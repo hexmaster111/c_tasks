@@ -2,5 +2,9 @@
     "lldb.displayFormat": "auto",
     "lldb.showDisassembly": "always",
     "lldb.dereferencePointers": true,
-    "lldb.consoleMode": "commands"
+    "lldb.consoleMode": "commands",
+    "files.associations": {
+        "task.h": "c",
+        "fcntl.h": "c"
+    }
 }
