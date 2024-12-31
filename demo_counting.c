@@ -100,4 +100,6 @@ void main()
             printf("Task %p done %s\n", ittr.method, ittr.task_resault ? ittr.task_resault : "");
         }
     }
+
+    TaskRunner_Free(&r);
 }

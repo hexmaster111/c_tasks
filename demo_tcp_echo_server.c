@@ -163,6 +163,7 @@ int main()
     }
 
     close(server.fd);
+    TaskRunner_Free(&tr);
 }
 
 struct Connection create_tcp_socket_fd()
