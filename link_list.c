@@ -203,6 +203,24 @@ void llist_sort(LLISTPTR t, LLIST_COMPARISON_FUNC comp)
     llist_quick_sort(t, 0, t->len - 1, comp);
 }
 
+int llist_idxof(LLISTPTR t, void *item)
+{
+
+    LINKED_LIST_CONTAINERPTR c = t->head;
+    int idx = 0;
+
+    while (c)
+    {
+        if(c->data == item) 
+            return idx;
+
+        c = c->next;
+        idx += 1;
+    }
+
+    return -1;
+}
+
 void llist_itterate(LLISTPTR t, LLIST_ITTERATOR_FUNC ittrf, void *user)
 {
     // todo: have a way to check if the list was modifyed while itterating
@@ -211,4 +229,3 @@ void llist_itterate(LLISTPTR t, LLIST_ITTERATOR_FUNC ittrf, void *user)
         ittrf(llist_at(t, i), user);
     }
 }
-

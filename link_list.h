@@ -46,4 +46,6 @@ void llist_sort(LLISTPTR t, LLIST_COMPARISON_FUNC f);
 
 /// @brief calls <i> for every element in <t>
 void llist_itterate(LLISTPTR t, LLIST_ITTERATOR_FUNC i, void *user);
+
+int llist_idxof(LLISTPTR t, void *item);
 #endif // LLIST_H
