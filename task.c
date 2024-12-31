@@ -1,6 +1,8 @@
-#include <stdio.h>
+#include "task.h"
 #include <stdlib.h>
-#include "link_list.h"
+#include <stddef.h>
+
+#pragma region Link List Impl
 
 LINKED_LIST_CONTAINERPTR newcontainer()
 {
@@ -61,24 +63,6 @@ void llist_append(LLISTPTR t, void *data)
     tmp->next = new;
 }
 
-void llist_prepend(LLISTPTR t, void *data)
-{
-    if (t->head == NULL) /* this is a new list with no head */
-    {
-        t->head = newcontainer();
-        t->head->data = data;
-        t->len = 1;
-        return;
-    }
-
-    LINKED_LIST_CONTAINERPTR new = newcontainer();
-    new->data = data;
-    new->next = t->head;
-
-    t->head = new;
-    t->len = t->len + 1;
-}
-
 void *llist_at(LLISTPTR t, int idx)
 {
     if (idx > t->len)
@@ -98,25 +82,6 @@ void *llist_at(LLISTPTR t, int idx)
 int llist_is_empty(LLISTPTR t)
 {
     return t->len == 0;
-}
-
-void llist_insert(LLISTPTR t, void *data, int idx)
-{
-    t->len += 1;
-
-    LINKED_LIST_CONTAINERPTR c = t->head;
-    idx--;
-
-    while (idx)
-    {
-        c = c->next;
-        idx = idx - 1;
-    }
-
-    LINKED_LIST_CONTAINERPTR new = newcontainer();
-    new->data = data;
-    new->next = c->next;
-    c->next = new;
 }
 
 void llist_remove(LLISTPTR t, int idx)
@@ -147,62 +112,6 @@ void llist_remove(LLISTPTR t, int idx)
     free(tofree);
 }
 
-void llist_swap(LLISTPTR t, int x, int y)
-{
-    LINKED_LIST_CONTAINERPTR f = llist_container_at(t, x),
-                             s = llist_container_at(t, y);
-
-    void *tmp = s->data;
-
-    s->data = f->data;
-    f->data = tmp;
-}
-
-// ===================== QUICK SORT IMPL ========================= //
-int llist_quick_sort_partition(LLISTPTR l, int low, int high, LLIST_COMPARISON_FUNC comp)
-{
-    int i = low, j = high;
-
-    void *pv = llist_at(l, low);
-
-    while (i < j)
-    {
-        // find the first element that is gtr then the pivot
-        while (comp(llist_at(l, i), pv) < 1 && i <= high - 1)
-        {
-            i++;
-        }
-
-        // find the first element smaller then pvt (from last)
-        while (comp(llist_at(l, j), pv) > 0 && j >= low + 1)
-        {
-            j--;
-        }
-
-        if (i < j)
-        {
-            llist_swap(l, i, j);
-        }
-    }
-    llist_swap(l, low, j);
-    return j;
-}
-
-void llist_quick_sort(LLISTPTR l, int low, int high, LLIST_COMPARISON_FUNC comp)
-{
-    if (low < high)
-    {
-        int partIdx = llist_quick_sort_partition(l, low, high, comp);
-        llist_quick_sort(l, low, partIdx - 1, comp);
-        llist_quick_sort(l, partIdx + 1, high, comp);
-    }
-}
-
-void llist_sort(LLISTPTR t, LLIST_COMPARISON_FUNC comp)
-{
-    llist_quick_sort(t, 0, t->len - 1, comp);
-}
-
 int llist_idxof(LLISTPTR t, void *item)
 {
 
@@ -211,7 +120,7 @@ int llist_idxof(LLISTPTR t, void *item)
 
     while (c)
     {
-        if(c->data == item) 
+        if (c->data == item)
             return idx;
 
         c = c->next;
@@ -228,4 +137,64 @@ void llist_itterate(LLISTPTR t, LLIST_ITTERATOR_FUNC ittrf, void *user)
     {
         ittrf(llist_at(t, i), user);
     }
+}
+#pragma endregion Link List Impl
+
+void TaskRunner_AddTask(struct TaskRunner *t, struct TaskInfo *tinfo)
+{
+    llist_append(&t->task_info_list, tinfo);
+}
+
+void _RunTasks_itter(void *listdata, void *user)
+{
+    struct TaskInfo *tinfo = listdata;
+    struct TaskRunner *tr = user;
+
+    tinfo->method(tr, tinfo, tinfo->task_state);
+}
+
+void TaskRunner_RunTasks(struct TaskRunner *t)
+{
+    llist_itterate(&t->task_info_list, _RunTasks_itter, t);
+}
+
+int TaskRunner_HasTasks(struct TaskRunner *t) { return t->task_info_list.len > 0; }
+
+// returns 1 and puts the last compleated task into the value at t
+// use it with a while() loop to itterate through all tasks that where compelated
+// this loop through
+int TaskRunner_Itter_FreeCompleatedTask(struct TaskRunner *r, struct TaskInfo *t)
+{
+    if (llist_is_empty(&r->task_compleated_list))
+    {
+        *t = (struct TaskInfo){.task_state = 0, .method = 0};
+        return 0;
+    }
+
+    *t = *(struct TaskInfo *)llist_at(&r->task_compleated_list, r->task_compleated_list.len - 1);
+
+    llist_remove(&r->task_compleated_list, r->task_compleated_list.len - 1);
+    // TODO: Im pretty sure there should be a call freeing the (TaskInfo *) that was in the list...
+    // unless we wanna do some kinda recycling of tasks so we arnt constantly malloc/freeing thease
+    // little task structures
+    return 1;
+}
+
+// Task compleation API
+void TaskCompleate(struct TaskRunner *t, struct TaskInfo *tinfo, void *task_resault)
+{
+    tinfo->task_resault = task_resault;
+
+    int runlistidx = llist_idxof(&t->task_info_list, tinfo);
+    if (runlistidx == -1)
+        return; // TODO: Warning -- task done, and called task compleate, but we couldnt find it in our task list!
+
+    llist_remove(&t->task_info_list, runlistidx);
+    llist_append(&t->task_compleated_list, tinfo);
+};
+
+void TaskRunner_Free(struct TaskRunner *t)
+{
+    llist_free(&t->task_compleated_list);
+    llist_free(&t->task_info_list);
 }
