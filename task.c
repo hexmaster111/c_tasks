@@ -132,7 +132,7 @@ int llist_idxof(LLISTPTR t, void *item)
 
 void llist_itterate(LLISTPTR t, LLIST_ITTERATOR_FUNC ittrf, void *user)
 {
-    // todo: have a way to check if the list was modifyed while itterating 
+    // todo: have a way to check if the list was modifyed while itterating
     for (size_t i = 0; i < t->len; i++)
     {
         ittrf(llist_at(t, i), user);
@@ -167,10 +167,10 @@ int TaskRunner_Itter_FreeCompleatedTask(struct TaskRunner *r, struct TaskInfo *t
 {
     if (llist_is_empty(&r->task_compleated_list))
     {
-        *t = (struct TaskInfo){.task_state = 0, .method = 0};
         return 0;
     }
 
+    // store the complated task in the out var
     *t = *(struct TaskInfo *)llist_at(&r->task_compleated_list, r->task_compleated_list.len - 1);
 
     llist_remove(&r->task_compleated_list, r->task_compleated_list.len - 1);
@@ -183,12 +183,19 @@ int TaskRunner_Itter_FreeCompleatedTask(struct TaskRunner *r, struct TaskInfo *t
 // Task compleation API
 void TaskCompleate(struct TaskRunner *t, struct TaskInfo *tinfo, void *task_resault)
 {
+    // Store the task resault
     tinfo->task_resault = task_resault;
 
     int runlistidx = llist_idxof(&t->task_info_list, tinfo);
     if (runlistidx == -1)
         return; // TODO: Warning -- task done, and called task compleate, but we couldnt find it in our task list!
 
+    /*
+        Here we swap the task out from the running task list into
+        the task compleated list. This lets the user call
+        TaskRunner_Itter_FreeCompleatedTask in a while loop to
+        handle compleated tasks
+     */
     llist_remove(&t->task_info_list, runlistidx);
     llist_append(&t->task_compleated_list, tinfo);
 };
