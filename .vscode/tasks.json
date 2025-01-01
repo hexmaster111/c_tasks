@@ -9,6 +9,8 @@
                 "-g",
                 "${file}",
                 "task.c",
+                "-lraylib",
+                "-lm",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],

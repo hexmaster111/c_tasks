@@ -32,7 +32,7 @@ void SquareResizeTask(struct TaskRunner *run, struct TaskInfo *self, void *data)
         // clang-format on
     }
 
-    TraceLog(LOG_INFO, "%d %.2f", ctx->state, ctx->trans);
+    // TraceLog(LOG_INFO, "%d %.2f", ctx->state, ctx->trans);
 
     if (ctx->trans >= ctx->distance)
     {
@@ -45,7 +45,7 @@ void SquareResizeTask(struct TaskRunner *run, struct TaskInfo *self, void *data)
 
 #define SQUARES (25)
 
-#define map(value, fromLow, fromHigh, toLow, toHigh) (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
+#define map(value, fromLow, fromHigh, toLow, toHigh) ((value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow)
 
 float GetRandomFloat(float min, float max)
 {
@@ -81,8 +81,8 @@ void main()
     {
         ctx[i] = (SquareResizeContext){
             .obj = &rect[i],
-            .distance = 1,                          // normaly 0-1
-            .speed = .01,                           // .01 - .001 ~
+            .distance = GetRandomFloat(0.5f, 1.5f), // normaly 0-1
+            .speed = GetRandomFloat(.001, .01),     // .01 - .001 ~
             .trans = GetRandomFloat(0, 1),          // spot in anamation
             .state = GetRandomValue(0, SRT_MAX - 1) // 0 - SRT_MAX-1
         };
