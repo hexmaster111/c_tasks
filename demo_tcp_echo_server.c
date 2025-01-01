@@ -27,7 +27,6 @@ struct Connection
     int fd, len;
     struct sockaddr_in saddr;
     struct TaskInfo tinfo;
-
 } g_connection_context[MAX_CONNECTIONS] = {0};
 
 struct Connection *GetNextOpenConnection()

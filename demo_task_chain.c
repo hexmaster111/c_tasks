@@ -97,12 +97,11 @@ int main()
 
 // --------------- WHAT IM KINDA THINKING ---------------
 
-void Schedule(struct TaskInfo *this, struct TaskInfo *after)
-{
-    
-}
+
+typedef struct TaskInfo TI;
+
 
 int _main()
 {
-    Schedule(T1, NULL);
+        
 }
