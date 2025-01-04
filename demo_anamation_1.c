@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include "task.h"
+#include <stdlib.h>
 
 typedef struct SquareResizingAnamation
 {
@@ -45,12 +46,20 @@ void SquareResizeTask(struct TaskRunner *run, struct TaskInfo *self, void *data)
 
 #define SQUARES (25)
 
-#define map(value, fromLow, fromHigh, toLow, toHigh) ((value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow)
+#define map(VAL, fromLow, fromHigh, toLow, toHigh) \
+    ((VAL - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow)
 
 float GetRandomFloat(float min, float max)
 {
-    int r = GetRandomValue(0, __INT_MAX__);
-    return map(r, 0.0f, __INT_MAX__, min, max);
+    if (min > max)
+    {
+        float tmp = max;
+        max = min;
+        min = tmp;
+    }
+
+    int r = GetRandomValue(0, RAND_MAX);
+    return r * (max - min) / RAND_MAX + min;
 }
 
 void main()
@@ -58,19 +67,6 @@ void main()
     InitWindow(800, 600, "Anamation");
     SetTargetFPS(60);
     struct TaskRunner anamator = {0};
-
-    // Rectangle rect = {100, 100, 100, 100};
-    // Rectangle rect2 = {20, 20, 100, 100};
-    // struct TaskInfo squareAnamation = {
-    //     .method = SquareResizeTask,
-    //     .task_state = &(SquareResizeContext){.obj = &rect, .state = 0, .speed = 0.01f, .distance = 1.0f}};
-
-    // struct TaskInfo squareAnamation2 = {
-    //     .method = SquareResizeTask,
-    //     .task_state = &(SquareResizeContext){.obj = &rect2, .state = 1, .speed = 0.01f, .distance = 1.0f}};
-
-    // TaskRunner_AddTask(&anamator, &squareAnamation);
-    // TaskRunner_AddTask(&anamator, &squareAnamation2);
 
     Rectangle rect[SQUARES];
     struct TaskInfo task[SQUARES];
@@ -82,7 +78,7 @@ void main()
         ctx[i] = (SquareResizeContext){
             .obj = &rect[i],
             .distance = GetRandomFloat(0.5f, 1.5f), // normaly 0-1
-            .speed = GetRandomFloat(.001, .01),     // .01 - .001 ~
+            .speed = GetRandomFloat(0.001f, 0.01f),     // .01 - .001 ~
             .trans = GetRandomFloat(0, 1),          // spot in anamation
             .state = GetRandomValue(0, SRT_MAX - 1) // 0 - SRT_MAX-1
         };
