@@ -1,4 +1,4 @@
-# C Async
+# C tasks
 
 C Async is a libaray to make working with in a task based way easer in C
 
